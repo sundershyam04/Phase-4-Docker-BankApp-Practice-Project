@@ -1,0 +1,24 @@
+Deploy a Prototype Webapp of a Bank Login Page Using Docker
+
+Github : https://github.com/sundershyam04/Phase-4-Docker-BankApp-Practice-Project.git
+
+----------------------------------WRITEUP-----------------------------
+
+1) ASP.NET MVC core project is created 
+
+2) Docker support is enabled
+
+3) In home controller, index page corresponds to login page of bank
+
+4) dashboard page is displayed when username and password is valid
+
+5) The application is build using docker build command to create a image 
+
+6) using docker run, we created container of the app inside image
+
+7) We tested by running the port number assigned and the app is up and running
+
+8) App is pushed to dockerhub
+
+
+hence bank app is deployed into docker

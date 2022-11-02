@@ -1,0 +1,172 @@
+Deploy a Prototype Webapp of a Bank Login Page Using Docker
+
+Github : https://github.com/sundershyam04/Phase-4-Docker-BankApp-Practice-Project.git
+
+
+----------------------------------SOURCECODE-----------------------------
+
+Homecontroller.cs
+
+using Bank_PracticeProject_phase_4.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+
+namespace Bank_PracticeProject_phase_4.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+
+
+        List<User> userlist = new List<User>();
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+
+            userlist.Add(new Models.User { Username = "Siva", Password = "siva@123" });
+            userlist.Add(new Models.User { Username = "Ramya", Password = "ramya@123" });
+            userlist.Add(new Models.User { Username = "Ganesh", Password = "ganesh@123" });
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Index(User u)
+        {
+           var found = userlist.Find( f => ((f.Username == u.Username) && (f.Password == u.Password)));
+
+            if(found!=null)
+            {
+                return RedirectToAction("Dashboard", "Home");
+            }
+
+            else
+            {
+                return View();
+            }
+        }
+
+
+        public IActionResult Dashboard()
+        {
+
+            return View();
+        }
+        //[HttpPost]
+        //public IActionResult Dashboard(FormCollection f)
+        //{
+
+        //    return RedirectToAction("Index");
+        //}
+
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+
+----------------------------
+
+Models
+User.cs
+
+namespace Bank_PracticeProject_phase_4.Models
+{
+    public class User
+    {
+        public string ? Username { get; set; }
+        public string ? Password { get; set; }
+    }
+}
+
+----------------------------
+Index.cshtml
+
+@model Bank_PracticeProject_phase_4.Models.User
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>ABC BANK</h1>
+
+<h4>Login</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Index">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Username" class="control-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Login" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+-------------------
+Dashboard.cshtml
+
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1>Dashboard</h1>
+<a asp-controller="Home"
+   asp-action="Index">LOGOUT</a>
+</div> 
+
+-----------------------
+
+DOCKERFILE
+
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["Bank PracticeProject phase-4.csproj", "."]
+RUN dotnet restore "./Bank PracticeProject phase-4.csproj"
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "Bank PracticeProject phase-4.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Bank PracticeProject phase-4.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Bank PracticeProject phase-4.dll"]
+
+---------------------------------
